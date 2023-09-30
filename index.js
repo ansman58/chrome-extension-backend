@@ -2,14 +2,14 @@ const express = require("express");
 const upload = require("./multer");
 const fs = require("fs");
 const path = require("path");
-const router = require("./src/routes/videos");
+const videoRoutes = require("./src/routes/videos");
 
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-app.use("video", router);
+app.use("/video", upload.single("file"), videoRoutes);
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));

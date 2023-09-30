@@ -5,6 +5,7 @@ const Video = require("../models/videoModel");
 class VideoController {
   static async addVideo(req, res) {
     try {
+      console.log("filllleee", req.file);
       const videoPath = req.file.path;
       const videoName = req.file.originalname;
 
