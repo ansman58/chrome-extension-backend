@@ -1,5 +1,5 @@
 const express = require("express");
-const upload = require("./multer");
+const upload = require("./src/services/multer");
 const fs = require("fs");
 const path = require("path");
 const videoRoutes = require("./src/routes/videos");
