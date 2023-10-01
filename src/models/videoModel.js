@@ -23,6 +23,9 @@ VideoModel.init(
     mimeType: {
       type: DataTypes.TEXT,
     },
+    transcription: {
+      type: DataTypes.TEXT,
+    },
     meta: {
       type: DataTypes.TEXT,
     },

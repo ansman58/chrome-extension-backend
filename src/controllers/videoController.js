@@ -106,12 +106,20 @@ class VideoController {
 
         const videoStream = fs.createReadStream(videoPath);
         videoStream.pipe(res);
-        // res.send("Hello World")
-        // console.log('helo world')
       }
     } catch (error) {
       console.error("Error streaming video:", { error: error.message });
       res.status(500).json({ error: "Error streaming video" });
+    }
+  }
+
+  static async getAllVideos(req, res) {
+    try {
+      const video = await Video.findAndCountAll();
+      return res.send(video);
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ error: error.message });
     }
   }
 }

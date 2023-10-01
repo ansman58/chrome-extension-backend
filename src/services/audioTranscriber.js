@@ -1,7 +1,6 @@
 require("dotenv").config();
 const fs = require("fs");
 const { Deepgram } = require("@deepgram/sdk");
-const path = require("path");
 const Video = require("../models/videoModel");
 
 const audioTranscriber = async (req, res, next) => {
@@ -47,17 +46,45 @@ const audioTranscriber = async (req, res, next) => {
       };
     }
 
-    // Send the audio to Deepgram and get the response
-    const response = await deepgram.transcription.preRecorded(source, {
-      smart_format: true,
-      model: "nova",
-    });
+    const getVideo = await Video.findByPk(videoId);
 
-    // Write the transcript to the console
-    console.log("Transcription successful:");
-    // console.log('transacribed data', response.results.channels)
-    // console.log(response.results.channels[0].alternatives[0].transcript);
-    console.log(response.results.channels[0].alternatives[0].words);
+    // if (getVideo.transcription) {
+    //   console.log("already existtsss");
+    //   console.log(getVideo.transcription);
+    // }
+
+    // Send the audio to Deepgram and get the response
+
+    if (!getVideo.transcription) {
+      console.log("still got calledddddd");
+
+      const response = await deepgram.transcription.preRecorded(source, {
+        smart_format: true,
+        model: "nova",
+      });
+
+      // Write the transcript to the console
+      console.log("Transcription successful:");
+      // console.log('transacribed data', response.results.channels)
+      // console.log(response.results.channels[0].alternatives[0].transcript);
+
+      const transcriptions =
+        response.results.channels[0].alternatives[0].transcript;
+      // console.log(response.results.channels[0].alternatives[0].words);
+
+      console.log(transcriptions);
+
+      await Video.update(
+        {
+          transcription: JSON.stringify(transcriptions),
+        },
+        {
+          where: {
+            id: videoId,
+          },
+        }
+      );
+    }
 
     next();
   } catch (err) {
