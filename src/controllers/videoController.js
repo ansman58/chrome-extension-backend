@@ -113,6 +113,29 @@ class VideoController {
     }
   }
 
+  static async getVideoTranscription(req, res) {
+    try {
+      const videoId = req.params.videoId;
+
+      const video = await Video.findByPk(videoId);
+
+      if (!video) {
+        return res.status(400).send("Video file not found");
+      }
+
+      res.send({
+        msg: "Video file retrieved successfully",
+        data: video.transcription,
+      });
+    } catch (error) {
+      console.log(error.message);
+      res.status(500).send({
+        msg: "Failed to retrieve video file",
+        error: error?.message,
+      });
+    }
+  }
+
   static async getAllVideos(req, res) {
     try {
       const video = await Video.findAndCountAll();
