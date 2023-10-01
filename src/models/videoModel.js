@@ -14,7 +14,10 @@ VideoModel.init(
       type: DataTypes.TEXT,
       allowNull: false,
     },
-    path: {
+    videoFilepath: {
+      type: DataTypes.TEXT,
+    },
+    audioFilePath: {
       type: DataTypes.TEXT,
     },
     mimeType: {

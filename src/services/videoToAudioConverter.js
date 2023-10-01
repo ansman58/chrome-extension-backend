@@ -1,6 +1,7 @@
 const fs = require("fs");
 const { exec } = require("child_process");
 const path = require("path");
+const audioTranscriber = require("./audioTranscriber");
 
 function videoToAudioConverter(req, res, next) {
   const targetDirectory = "public";
