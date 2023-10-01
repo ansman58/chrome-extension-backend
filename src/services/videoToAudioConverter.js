@@ -4,7 +4,7 @@ const path = require("path");
 
 function videoToAudioConverter(req, res, next) {
   const targetDirectory = "public";
-  const uploadSubdirectory = "public/uploads";
+  const uploadSubdirectory = "public/audios";
   const inputFile = req.file.path;
 
   const inputFileNameWithoutExtension = path.basename(
