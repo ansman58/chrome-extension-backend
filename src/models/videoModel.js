@@ -17,6 +17,9 @@ VideoModel.init(
     path: {
       type: DataTypes.TEXT,
     },
+    mimeType: {
+      type: DataTypes.TEXT,
+    },
     meta: {
       type: DataTypes.TEXT,
     },
