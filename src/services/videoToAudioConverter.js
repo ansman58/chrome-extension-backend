@@ -1,7 +1,6 @@
 const fs = require("fs");
 const { exec } = require("child_process");
 const path = require("path");
-const audioTranscriber = require("./audioTranscriber");
 
 function videoToAudioConverter(req, res, next) {
   const targetDirectory = "public";
@@ -38,7 +37,8 @@ function videoToAudioConverter(req, res, next) {
         if (err) {
           console.error(`Download error: ${err.message}`);
           return next(err);
-        }
+        } 
+    
 
         // Cleanup: Delete the input and output files (uncomment if needed)
         // fs.unlinkSync(inputFile);

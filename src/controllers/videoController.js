@@ -3,7 +3,6 @@ const Video = require("../models/videoModel");
 const path = require("path");
 const { exec } = require("child_process");
 const videoToAudioConverter = require("../services/videoToAudioConverter");
-const audioTranscriber = require("../services/audioTranscriber");
 
 class VideoController {
   static async addVideo(req, res, next) {
@@ -13,12 +12,13 @@ class VideoController {
         return res.status(400).json({ error: "Please upload a video file" });
       }
 
-      videoToAudioConverter(req, res, next);
+      //   videoToAudioConverter(req, res, next);
 
       const videoFilepath = req.file.path;
       const videoName = req.file.originalname;
-      const audioFilePath =
-        path.basename(videoFilepath, path.extname(videoFilepath)) + ".mp3";
+
+      const fileExtension = path.extname(videoFilepath);
+      const audioFilePath = videoFilepath.replace(fileExtension, ".mp3");
 
       // Store video information in the database
       const video = await Video.create({
@@ -29,19 +29,12 @@ class VideoController {
         meta: JSON.stringify(req.file),
       });
 
-      if (video) {
-        if (!!audioTranscriber(req, res)) {
-          console.log(audioTranscriber(req, res));
-          return res.status(200).json({ message: "Transcription successful" });
-          // Respond with a success message or relevant information about the uploaded video.
-          res.json({
-            message: "Video uploaded successfully",
-            videoId: video,
-          });
-        } else {
-          return res.status(400).json({ error: "Transcription failed" });
-        }
-      }
+      // Respond with a success message or relevant information about the uploaded video.
+      res.json({
+        message: "Video uploaded successfully",
+        videoId: video,
+        audioFilePath,
+      });
     } catch (error) {
       console.error("Error uploading video:", error);
       res
