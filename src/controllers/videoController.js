@@ -1,13 +1,20 @@
 const fs = require("fs");
 const Video = require("../models/videoModel");
 const path = require("path");
+const { exec } = require("child_process");
+const videoToAudioConverter = require("../services/videoToAudioConverter");
 
 class VideoController {
-  static async addVideo(req, res) {
+  static async addVideo(req, res, next) {
     try {
       console.log("file", req.file);
+      if (!req.file) {
+        return res.status(400).json({ error: "Please upload a video file" });
+      }
       const videoPath = req.file.path;
       const videoName = req.file.originalname;
+
+      videoToAudioConverter(req, res, next);
 
       // Store video information in the database
       const video = await Video.create({
@@ -92,9 +99,82 @@ class VideoController {
 
         const videoStream = fs.createReadStream(videoPath);
         videoStream.pipe(res);
+        // res.send("Hello World")
+        // console.log('helo world')
       }
     } catch (error) {
       console.error("Error streaming video:", { error: error.message });
+      res.status(500).json({ error: "Error streaming video" });
+    }
+  }
+
+  // Middleware for streaming video
+  static async streamVideo(req, res) {
+    try {
+      const videoId = req.params.videoId;
+
+      if (!videoId) {
+        return res.status(400).send("Video ID is required");
+      }
+
+      const video = await Video.findByPk(videoId);
+
+      if (!video) {
+        return res
+          .status(404)
+          .send("Video not found. Please provide a valid video ID");
+      }
+
+      const videoPath = video.path;
+      const mimeType = video.mimeType;
+
+      const fileStat = fs.statSync(videoPath);
+      const fileSize = fileStat.size;
+
+      // Check for the Range header
+      const range = req.headers.range;
+
+      if (range) {
+        const CHUNK_SIZE = 10 ** 6; // 1MB
+        const [start, end] = range
+          .replace(/bytes=/, "")
+          .split("-")
+          .map(Number);
+
+        const chunkStart = isNaN(start) ? 0 : start;
+        const chunkEnd = isNaN(end)
+          ? Math.min(chunkStart + CHUNK_SIZE - 1, fileSize - 1)
+          : end;
+
+        const contentLength = chunkEnd - chunkStart + 1;
+
+        res.writeHead(206, {
+          "Content-Type": mimeType,
+          "Accept-Ranges": "bytes",
+          "Content-Range": `bytes ${chunkStart}-${chunkEnd}/${fileSize}`,
+          "Content-Length": contentLength,
+        });
+
+        // Create a readable stream for the video file with the specified range
+        const videoStream = fs.createReadStream(videoPath, {
+          start: chunkStart,
+          end: chunkEnd,
+        });
+
+        videoStream.pipe(res);
+      } else {
+        // No range header, send the whole video
+        res.writeHead(200, {
+          "Content-Type": mimeType,
+          "Accept-Ranges": "bytes",
+          "Content-Length": fileSize,
+        });
+
+        const videoStream = fs.createReadStream(videoPath);
+        videoStream.pipe(res);
+      }
+    } catch (error) {
+      console.error("Error streaming video:", error.message);
       res.status(500).json({ error: "Error streaming video" });
     }
   }
