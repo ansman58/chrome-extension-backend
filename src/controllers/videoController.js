@@ -12,13 +12,14 @@ class VideoController {
         return res.status(400).json({ error: "Please upload a video file" });
       }
 
-      //   videoToAudioConverter(req, res, next);
+      videoToAudioConverter(req, res, next);
 
       const videoFilepath = req.file.path;
       const videoName = req.file.originalname;
 
-      const fileExtension = path.extname(videoFilepath);
-      const audioFilePath = videoFilepath.replace(fileExtension, ".mp3");
+      const audioFile =
+        path.basename(videoFilepath, path.extname(videoFilepath)) + ".mp3";
+      const audioFilePath = path.join("public/audios", audioFile);
 
       // Store video information in the database
       const video = await Video.create({
