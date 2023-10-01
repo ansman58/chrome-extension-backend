@@ -3,17 +3,26 @@ const { exec } = require("child_process");
 const path = require("path");
 
 function videoToAudioConverter(req, res, next) {
-  const dir = "public";
-  const subDirectory = "public/uploads";
+  const targetDirectory = "public";
+  const uploadSubdirectory = "public/uploads";
   const inputFile = req.file.path;
-  const outputFile = path.join(subDirectory, "output.mp3");
 
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir);
+  const inputFileNameWithoutExtension = path.basename(
+    inputFile,
+    path.extname(inputFile)
+  );
+
+  const outputFile = path.join(
+    uploadSubdirectory,
+    inputFileNameWithoutExtension + ".mp3"
+  );
+
+  if (!fs.existsSync(targetDirectory)) {
+    fs.mkdirSync(targetDirectory);
   }
 
-  if (!fs.existsSync(subDirectory)) {
-    fs.mkdirSync(subDirectory);
+  if (!fs.existsSync(uploadSubdirectory)) {
+    fs.mkdirSync(uploadSubdirectory);
   }
 
   const ffmpegCommand = `ffmpeg -i "${inputFile}" "${outputFile}"`;
@@ -23,14 +32,14 @@ function videoToAudioConverter(req, res, next) {
       console.error(`FFmpeg error: ${error.message}`);
       return next(error);
     } else {
-      console.log("File is converted successfully");
+      console.log("File conversion successful");
       res.download(outputFile, (err) => {
         if (err) {
           console.error(`Download error: ${err.message}`);
           return next(err);
         }
 
-        // Cleanup: Delete the input and output files
+        // Cleanup: Delete the input and output files (uncomment if needed)
         // fs.unlinkSync(inputFile);
         // fs.unlinkSync(outputFile);
 
