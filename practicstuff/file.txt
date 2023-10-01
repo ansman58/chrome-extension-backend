@@ -1,3 +1,65 @@
 Lorrm Ipsum dolor
 
 My peopleeeeeeeeeeee
+
+static async getVideo(req, res) {
+    const videoId = req.params.videoId;
+
+    try {
+      // Find the video by ID in the database
+
+      if (!videoId) {
+        return res.status(400).send("Video ID is required");
+      }
+
+      const video = await Video.findByPk(videoId);
+
+      if (!video) {
+        return res
+          .status(404)
+          .send("Video not found. Please provide a valid video ID");
+      }
+
+      const videoPath = video.path;
+      const mimeType = video.mimeType;
+      const fileData = fs.statSync(videoPath).size;
+
+      // Check for the Range header
+      const range = req.headers.range;
+      if (range) {
+        const positions = range.replace(/bytes=/, "").split("-");
+        const [start, end] = positions;
+
+        // Create headers
+        res.writeHead(206, {
+          "Content-Type": mimeType,
+          "Access-Control-Allow-Origin": "*", // Required for CORS support to work
+          "Accept-Ranges": "bytes",
+          "Content-Range": `bytes ${start}-${end}/${fileData}`,
+          "Content-Length": end - start + 1,
+        });
+
+        // Create a readable stream for the video file
+        const videoStream = fs.createReadStream(videoPath, {
+          start: Number(start),
+          end: Number(end),
+        });
+
+        videoStream.pipe(res);
+      } else {
+        // No range header
+        res.writeHead(200, {
+          "Content-Type": mimeType,
+          "Access-Control-Allow-Origin": "*", // Required for CORS support to work
+          "Accept-Ranges": "bytes",
+          "Content-Length": fileData,
+        });
+
+        const videoStream = fs.createReadStream(videoPath);
+        videoStream.pipe(res);
+      }
+    } catch (error) {
+      console.error("Error streaming video:", error);
+      res.status(500).json({ error: "Error streaming video" });
+    }
+  }
