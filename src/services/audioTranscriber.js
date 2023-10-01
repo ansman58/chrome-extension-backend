@@ -10,11 +10,11 @@ const audioTranscriber = async (req, res, next) => {
 
   try {
     const videoId = req.params.videoId;
-    console.log("videoId:", videoId);
+    if (!videoId) {
+      return res.status(400).send("Please a video ID");
+    }
 
     const video = await Video.findByPk(videoId);
-
-    console.log("video", video);
 
     if (!video) {
       return res
@@ -55,7 +55,9 @@ const audioTranscriber = async (req, res, next) => {
 
     // Write the transcript to the console
     console.log("Transcription successful:");
-    console.log(response.results.channels[0].alternatives[0].transcript);
+    // console.log('transacribed data', response.results.channels)
+    // console.log(response.results.channels[0].alternatives[0].transcript);
+    console.log(response.results.channels[0].alternatives[0].words);
 
     next();
   } catch (err) {
