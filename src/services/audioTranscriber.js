@@ -48,10 +48,10 @@ const audioTranscriber = async (req, res, next) => {
 
     const getVideo = await Video.findByPk(videoId);
 
-    // if (getVideo.transcription) {
-    //   console.log("already existtsss");
-    //   console.log(getVideo.transcription);
-    // }
+    if (getVideo.transcription) {
+      console.log("already existtsss");
+      console.log(getVideo.transcription);
+    }
 
     // Send the audio to Deepgram and get the response
 

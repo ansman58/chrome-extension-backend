@@ -12,7 +12,6 @@ VideoModel.init(
     },
     name: {
       type: DataTypes.TEXT,
-      allowNull: false,
     },
     videoFilepath: {
       type: DataTypes.TEXT,
@@ -24,6 +23,12 @@ VideoModel.init(
       type: DataTypes.TEXT,
     },
     transcription: {
+      type: DataTypes.TEXT,
+    },
+    videoUrl: {
+      type: DataTypes.TEXT,
+    },
+    audioUrl: {
       type: DataTypes.TEXT,
     },
     meta: {

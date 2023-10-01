@@ -17,9 +17,17 @@ class VideoController {
       const videoFilepath = req.file.path;
       const videoName = req.file.originalname;
 
+      console.log("videoFilepath", videoFilepath);
+      const diskStorageUrl = `${req.protocol}://${req.header("host")}`;
+
       const audioFile =
         path.basename(videoFilepath, path.extname(videoFilepath)) + ".mp3";
       const audioFilePath = path.join("public/audios", audioFile);
+
+      const audioStorageUrl = `${diskStorageUrl}/public/audios/${audioFile}`;
+      const videoStorageUrl = `${diskStorageUrl}/public/videos/${path.basename(
+        videoFilepath
+      )}`;
 
       // Store video information in the database
       const video = await Video.create({
@@ -28,13 +36,14 @@ class VideoController {
         mimeType: req.file.mimetype,
         audioFilePath,
         meta: JSON.stringify(req.file),
+        videoUrl: videoStorageUrl,
+        audioUrl: audioStorageUrl,
       });
 
       // Respond with a success message or relevant information about the uploaded video.
       res.json({
         message: "Video uploaded successfully",
         videoId: video,
-        audioFilePath,
       });
     } catch (error) {
       console.error("Error uploading video:", error);
@@ -95,7 +104,6 @@ class VideoController {
         });
 
         videoStream.pipe(res);
-        return;
       } else {
         // No range header
         res.writeHead(200, {

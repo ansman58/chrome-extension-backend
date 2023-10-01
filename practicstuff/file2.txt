@@ -23,3 +23,15 @@ app.get("/video", (req, res) => {
 
 //   videoStream.pipe(res);
 // });
+
+
+
+    const videoDiskStorage = `${req.protocol}://${req.header(
+        "host"
+      )}/public/videos/${fileName}`;
+
+      const replaceExtension = fileName.replace(path.extname(fileName), ".mp3");
+
+      const audioDiskStorage = `${req.protocol}://${req.header(
+        "host"
+      )}/public/audios/${replaceExtension}`;
