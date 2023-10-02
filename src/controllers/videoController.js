@@ -3,6 +3,7 @@ const Video = require("../models/videoModel");
 const path = require("path");
 const { exec } = require("child_process");
 const videoToAudioConverter = require("../services/videoToAudioConverter");
+const { v4: uuidv4 } = require("uuid");
 
 class VideoController {
   static async addVideo(req, res, next) {
@@ -16,6 +17,7 @@ class VideoController {
 
       const videoFilepath = req.file.path;
       const videoName = req.file.originalname;
+      const videoId = uuidv4();
 
       console.log("videoFilepath", videoFilepath);
       const diskStorageUrl = `${req.protocol}://${req.header("host")}`;
@@ -25,18 +27,19 @@ class VideoController {
       const audioFilePath = path.join("public/audios", audioFile);
 
       const audioStorageUrl = `${diskStorageUrl}/public/audios/${audioFile}`;
-      const videoStorageUrl = `${diskStorageUrl}/public/videos/${path.basename(
-        videoFilepath
-      )}`;
+      // const videoStorageUrl = `${diskStorageUrl}/public/videos/${path.basename(
+      //   videoFilepath
+      // )}`;
 
       // Store video information in the database
       const video = await Video.create({
+        id: videoId,
         name: videoName,
         videoFilepath,
         mimeType: req.file.mimetype,
         audioFilePath,
         meta: JSON.stringify(req.file),
-        videoUrl: videoStorageUrl,
+        videoUrl: `${diskStorageUrl}/video/${videoId}`,
         audioUrl: audioStorageUrl,
       });
 
@@ -46,7 +49,6 @@ class VideoController {
         data: {
           id: video.id,
           videoUrl: video.videoUrl,
-          audioUrl: video.audioUrl,
         },
       });
     } catch (error) {
