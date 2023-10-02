@@ -2,12 +2,14 @@ const express = require("express");
 const upload = require("./src/services/multer");
 const videoRoutes = require("./src/routes/videos");
 const diskRoutes = require("./src/routes/diskStorage");
+const cors = require("cors");
 
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.set("view engine", "ejs");
+app.use(cors());
 
 app.use("/video", upload.single("file"), videoRoutes);
 app.use("/disk", diskRoutes);
