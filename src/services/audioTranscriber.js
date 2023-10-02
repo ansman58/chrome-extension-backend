@@ -65,18 +65,19 @@ const audioTranscriber = async (req, res, next) => {
 
       // Write the transcript to the console
       console.log("Transcription successful:");
-      // console.log('transacribed data', response.results.channels)
-      // console.log(response.results.channels[0].alternatives[0].transcript);
 
       const transcriptions =
         response.results.channels[0].alternatives[0].transcript;
-      // console.log(response.results.channels[0].alternatives[0].words);
+      const words = response.results.channels[0].alternatives[0].words;
 
       console.log(transcriptions);
 
       await Video.update(
         {
-          transcription: JSON.stringify(transcriptions),
+          transcription: JSON.stringify({
+            transcriptionInString: transcriptions,
+            transcriptionWithTimestamps: words,
+          }),
         },
         {
           where: {

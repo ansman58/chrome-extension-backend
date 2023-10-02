@@ -43,7 +43,11 @@ class VideoController {
       // Respond with a success message or relevant information about the uploaded video.
       res.json({
         message: "Video uploaded successfully",
-        videoId: video,
+        data: {
+          id: video.id,
+          videoUrl: video.videoUrl,
+          audioUrl: video.audioUrl,
+        },
       });
     } catch (error) {
       console.error("Error uploading video:", error);
@@ -133,7 +137,7 @@ class VideoController {
 
       res.send({
         msg: "Video file retrieved successfully",
-        data: video.transcription,
+        data: JSON.parse(video.transcription),
       });
     } catch (error) {
       console.log(error.message);
@@ -146,7 +150,9 @@ class VideoController {
 
   static async getAllVideos(req, res) {
     try {
-      const video = await Video.findAndCountAll();
+      const video = await Video.findAndCountAll({
+        attributes: ["id", "videoUrl", "audioUrl"],
+      });
       return res.send(video);
     } catch (error) {
       console.log(error);
