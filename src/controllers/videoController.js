@@ -153,7 +153,7 @@ class VideoController {
   static async getAllVideos(req, res) {
     try {
       const video = await Video.findAndCountAll({
-        attributes: ["id", "videoUrl", "audioUrl"],
+        attributes: ["id", "videoUrl"],
       });
       return res.send(video);
     } catch (error) {
