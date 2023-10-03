@@ -25,10 +25,20 @@ class DiskStorageController {
       const video = await VideoModel.findByPk(videoId);
 
       if (video.videoFilepath) {
-        fs.unlinkSync(video.videoFilepath);
+        fs.unlink(video.videoFilepath, (err) => {
+          if (err) {
+            console.error(err.message);
+            res.status(400).send(err.message);
+          }
+        });
       }
       if (video.audioFilePath) {
-        fs.unlinkSync(video.audioFilePath);
+        fs.unlink(video.audioFilePath, (err) => {
+          if (err) {
+            console.error(err.message);
+            res.status(400).send(err.message);
+          }
+        });
       }
 
       await VideoModel.destroy({
