@@ -8,14 +8,19 @@ class DiskStorageController {
       const videoId = req.params.videoId;
       const video = await VideoModel.findByPk(videoId);
 
+      if (!video) {
+        return res.status(404).send("Video not found");
+      }
+
       const options = {
         root: path.resolve(__dirname, "..", ".."),
       };
 
-      console.log("hello worldd from diskcontroller");
+      console.log("hello world from disk controller");
       res.sendFile(video.videoFilepath, options);
     } catch (error) {
-      console.log(error.message);
+      console.error(error.message);
+      res.status(500).send("Internal Server Error");
     }
   }
 
@@ -24,21 +29,17 @@ class DiskStorageController {
       const videoId = req.params.videoId;
       const video = await VideoModel.findByPk(videoId);
 
+      if (!video) {
+        return res.status(404).send("Video not found");
+      }
+
       if (video.videoFilepath) {
-        fs.unlink(video.videoFilepath, (err) => {
-          if (err) {
-            console.error(err.message);
-            res.status(400).send(err.message);
-          }
-        });
+        console.log("video file path", video.videoFilepath);
+        fs.unlinkSync(video.videoFilepath);
       }
       if (video.audioFilePath) {
-        fs.unlink(video.audioFilePath, (err) => {
-          if (err) {
-            console.error(err.message);
-            res.status(400).send(err.message);
-          }
-        });
+        console.log("audio file path", video.audioFilePath);
+        fs.unlinkSync(video.audioFilePath);
       }
 
       await VideoModel.destroy({
@@ -49,7 +50,8 @@ class DiskStorageController {
 
       return res.send("File Deleted successfully");
     } catch (error) {
-      console.log(error.message);
+      console.error(error.message);
+      res.status(500).send("Internal Server Error");
     }
   }
 }
