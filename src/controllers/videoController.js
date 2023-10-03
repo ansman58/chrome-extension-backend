@@ -2,7 +2,6 @@ const fs = require("fs");
 const Video = require("../models/videoModel");
 const path = require("path");
 const { exec } = require("child_process");
-const videoToAudioConverter = require("../services/videoToAudioConverter");
 const { v4: uuidv4 } = require("uuid");
 
 class VideoController {
@@ -13,8 +12,6 @@ class VideoController {
         return res.status(400).json({ error: "Please upload a video file" });
       }
 
-      videoToAudioConverter(req, res, next);
-
       const videoFilepath = req.file.path;
       const videoName = req.file.originalname;
       const videoId = uuidv4();
@@ -22,25 +19,14 @@ class VideoController {
       console.log("videoFilepath", videoFilepath);
       const diskStorageUrl = `${req.protocol}://${req.header("host")}`;
 
-      const audioFile =
-        path.basename(videoFilepath, path.extname(videoFilepath)) + ".mp3";
-      const audioFilePath = path.join("public/audios", audioFile);
-
-      const audioStorageUrl = `${diskStorageUrl}/public/audios/${audioFile}`;
-      // const videoStorageUrl = `${diskStorageUrl}/public/videos/${path.basename(
-      //   videoFilepath
-      // )}`;
-
       // Store video information in the database
       const video = await Video.create({
         id: videoId,
         name: videoName,
         videoFilepath,
         mimeType: req.file.mimetype,
-        audioFilePath,
         meta: JSON.stringify(req.file),
         videoUrl: `${diskStorageUrl}/video/${videoId}`,
-        audioUrl: audioStorageUrl,
       });
 
       // Respond with a success message or relevant information about the uploaded video.

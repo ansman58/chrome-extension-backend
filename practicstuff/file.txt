@@ -63,3 +63,12 @@ static async getVideo(req, res) {
       res.status(500).json({ error: "Error streaming video" });
     }
   }
+
+        const audioFile =
+        path.basename(videoFilepath, path.extname(videoFilepath)) + ".mp3";
+      const audioFilePath = path.join("public/audios", audioFile);
+
+      const audioStorageUrl = `${diskStorageUrl}/public/audios/${audioFile}`;
+      // const videoStorageUrl = `${diskStorageUrl}/public/videos/${path.basename(
+      //   videoFilepath
+      // )}`;
