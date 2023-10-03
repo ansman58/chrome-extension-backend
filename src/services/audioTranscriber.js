@@ -7,6 +7,8 @@ const audioTranscriber = async (req, res, next) => {
   // Your Deepgram API Key
   const deepgramApiKey = process.env.DEEPGRAM_API_KEY;
 
+  console.log("hello world from audio transcriber");
+
   try {
     const videoId = req.params.videoId;
     if (!videoId) {

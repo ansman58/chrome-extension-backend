@@ -33,11 +33,11 @@ class DiskStorageController {
         return res.status(404).send("Video not found");
       }
 
-      if (video.videoFilepath) {
+      if (video.videoFilepath !== null) {
         console.log("video file path", video.videoFilepath);
         fs.unlinkSync(video.videoFilepath);
       }
-      if (video.audioFilePath) {
+      if (video.audioFilePath !== null) {
         console.log("audio file path", video.audioFilePath);
         fs.unlinkSync(video.audioFilePath);
       }

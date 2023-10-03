@@ -4,67 +4,71 @@ const path = require("path");
 const VideoModel = require("../models/videoModel");
 
 async function videoToAudioConverter(req, res, next) {
-  const targetDirectory = "public";
-  const uploadSubdirectory = "public/audios";
+  try {
+    const targetDirectory = "public";
+    const uploadSubdirectory = "public/audios";
 
-  const video = await VideoModel.findByPk(req.params.videoId);
+    const video = await VideoModel.findByPk(req.params.videoId);
 
-  const inputFile = video.videoFilepath;
+    if (!video) {
+      return res.status(400).send("Video not found");
+    }
 
-  const inputFileNameWithoutExtension = path.basename(
-    inputFile,
-    path.extname(inputFile)
-  );
+    const inputFile = video.videoFilepath;
 
-  const outputFile = path.join(
-    uploadSubdirectory,
-    inputFileNameWithoutExtension + ".mp3"
-  );
+    if (!inputFile) {
+      return res.status(400).send("Video path not found");
+    }
 
-  const updateModel = await VideoModel.update(
-    {
-      audioFilePath: outputFile,
-    },
-    {
-      where: {
-        id: req.params.videoId,
+    const inputFileNameWithoutExtension = path.basename(
+      inputFile,
+      path.extname(inputFile)
+    );
+
+    const outputFile = path.join(
+      uploadSubdirectory,
+      inputFileNameWithoutExtension + ".mp3"
+    );
+
+    const updateModel = await VideoModel.update(
+      {
+        audioFilePath: outputFile,
       },
+      {
+        where: {
+          id: req.params.videoId,
+        },
+      }
+    );
+
+    if (!updateModel) {
+      return res.status(404).send("Error occurred updating model");
     }
-  );
 
-  if (!updateModel) {
-    return res.status(404).send("Error occured updating model");
-  }
+    if (!fs.existsSync(targetDirectory)) {
+      fs.mkdirSync(targetDirectory);
+    }
 
-  if (!fs.existsSync(targetDirectory)) {
-    fs.mkdirSync(targetDirectory);
-  }
+    if (!fs.existsSync(uploadSubdirectory)) {
+      fs.mkdirSync(uploadSubdirectory);
+    }
 
-  if (!fs.existsSync(uploadSubdirectory)) {
-    fs.mkdirSync(uploadSubdirectory);
-  }
+    const ffmpegCommand = `ffmpeg -i "${inputFile}" "${outputFile}"`;
 
-  const ffmpegCommand = `ffmpeg -i "${inputFile}" "${outputFile}"`;
+    console.log("ffmpegCommand", ffmpegCommand);
 
-  exec(ffmpegCommand, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`FFmpeg error: ${error.message}`);
-      return next(error);
-    } else {
+    exec(ffmpegCommand, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`FFmpeg error: ${error.message}`);
+        return res.status(500).send("Error converting file");
+      }
       console.log("File conversion successful");
-      res.download(outputFile, (err) => {
-        if (err) {
-          console.error(`Download error: ${err.message}`);
-          return next(err);
-        }
-
-        // Cleanup: Delete the input and output files (uncomment if needed)
-        // fs.unlinkSync(inputFile);
-        // fs.unlinkSync(outputFile);
-      });
-    }
-  });
-  next();
+    });
+    next();
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send("Internal Server Error");
+  }
 }
 
 module.exports = videoToAudioConverter;
